@@ -1,0 +1,9 @@
+digraph G {
+  node [shape=record];
+  usuarios [label="{usuarios|id PK\lnombre\lemail\lpassword_hash\lrol}"];
+  denuncias [label="{denuncias|id PK\lusuario_id FK\ltitulo\ldescripcion\lfoto_url\llat\llng\lestado}"];
+  comentarios [label="{comentarios|id PK\ldenuncia_id FK\lusuario_id FK\ltexto}"];
+  usuarios -> denuncias [label="1..*"];
+  denuncias -> comentarios [label="1..*"];
+  usuarios -> comentarios [label="1..*"];
+}
