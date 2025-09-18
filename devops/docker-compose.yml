@@ -13,7 +13,7 @@ services:
     env_file:
       - ../backend/.env.example
     ports:
-      - "4000:4000"
+      - "5000:5000"
     depends_on:
       - db
   frontend:
