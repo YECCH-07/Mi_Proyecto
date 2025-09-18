@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ejercicios Propuestos – HTML Básico</title>
+  <meta name="description" content="Solución de ejercicios básicos de HTML: estructura, encabezados, listas, vínculos, imágenes y video." />
+  <style>
+    /* Estilos mínimos para que se vea ordenado */
+    :root { --max: 980px; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; line-height: 1.6; margin: 0; }
+    header { background: #111; color: #fff; padding: 2rem 1rem; }
+    main { margin: 0 auto; max-width: var(--max); padding: 2rem 1rem; }
+    h1, h2, h3, h4 { line-height: 1.25; }
+    section { border-top: 1px solid #eee; padding-top: 1.25rem; margin-top: 1.25rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+    figure { margin: 0; border: 1px solid #eee; border-radius: 12px; overflow: hidden; background: #fafafa; }
+    figure img { width: 100%; height: auto; display: block; }
+    figure figcaption { font-size: .9rem; padding: .5rem .75rem; color: #444; }
+    .note { background: #f6f8fa; border-left: 4px solid #1f6feb; padding: .75rem 1rem; border-radius: 8px; }
+    footer { margin: 4rem auto 2rem; max-width: var(--max); padding: 0 1rem; color: #666; font-size: .9rem; }
+    code { background: #f0f0f0; padding: .1rem .3rem; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <!-- 6.1 Estructura básica: -->
+  <header>
+    <h1>Mi pagina Jose Alexander Quispe Salas</h1>
+    <p>Ingenieria Informatica y de Sistemas</p>
+  </header>
+
+  <main>
+    <!-- Título principal -->
+  <h1>6.2 Encabezados y Párrafos</h1>  
+  <h1>Pensamientos de Filósofos</h1>
+
+    <section id="socrates">
+        <h2>Sócrates</h2>
+        <p>Sócrates (470-399 a.C.) fue un filósofo griego considerado el padre de la filosofía moral. Su método consistía en hacer preguntas para guiar a sus interlocutores al conocimiento.</p>
+        
+        <h3>La Sabiduría</h3>
+        <p>“Solo sé que no sé nada”. Con esta frase, Sócrates nos recuerda la importancia de la humildad intelectual.</p>
+
+        <h4>Reflexión</h4>
+        <p>La verdadera sabiduría consiste en reconocer los propios límites del conocimiento.</p>
+    </section>
+
+    <section id="platon">
+        <h2>Platón</h2>
+        <p>Platón (427-347 a.C.) fue discípulo de Sócrates y maestro de Aristóteles. Fundó la Academia y desarrolló la teoría de las Ideas.</p>
+
+        <h3>La Justicia</h3>
+        <p>“La justicia consiste en hacer lo que a cada uno le corresponde”. Para Platón, el orden social dependía de que cada persona cumpliera su función.</p>
+
+        <h4>Reflexión</h4>
+        <p>La justicia no es solo una norma externa, sino una armonía interior entre las partes del alma.</p>
+    </section>
+
+    <section id="aristoteles">
+        <h2>Aristóteles</h2>
+        <p>Aristóteles (384-322 a.C.) fue discípulo de Platón y maestro de Alejandro Magno. Su filosofía abarcó desde la lógica hasta la ética y la política.</p>
+
+        <h3>La Felicidad</h3>
+        <p>“La felicidad depende de nosotros mismos”. Para Aristóteles, la vida buena se alcanzaba mediante la virtud y el justo medio.</p>
+
+        <h4>Reflexión</h4>
+        <p>El ser humano encuentra la plenitud cuando actúa de acuerdo con su razón y en equilibrio.</p>
+    </section>
+
+    <!-- 6.3 Listas HTML -->
+    <section id="listas">
+      <h2>6.3 Listas HTML</h2>
+      <h3>Lista – Películas Favoritas</h3>
+      <ol>
+        <li>El Señor de los Anillos</li>
+        <li>Demon Slayer</li>
+        <li>2012</li>
+        <li>Batman el Caballero de la noche</li>
+        <li>Iron man 2</li>
+        <li>Vengadores Inifity War</li>
+      </ol>
+
+      <h3>Lista – Comidas Favoritas</h3>
+      <ul>
+        <li>Ceviche</li>
+        <li>Lomo saltado</li>
+        <li>Pizza</li>
+        <li>Aji de Gallina</li>
+        <li>Ramen</li>
+        <li>Toasd Twister del KFC</li>
+      </ul>
+    </section>
+
+    <!-- 6.4 Vínculos -->
+    <section id="vinculos">
+      <h2>6.4 Vínculos (Enlaces)</h2>
+      <ul>
+        <li><a href="https://developer.mozilla.org/es/" target="_blank" rel="noopener noreferrer">MDN Web Docs</a></li>
+        <li><a href="https://www.w3schools.com/" target="_blank" rel="noopener noreferrer">W3Schools</a></li>
+        <li><a href="https://es.wikipedia.org/">Wikipedia en Español</a></li>
+        <li><a href="https://www.mysql.com/products/workbench/">MySQL Workbench</a></li>
+        <li><a href="https://www.apachefriends.org/es/index.html">XAMPP</a></li>
+      </ul>
+    </section>
+
+    <!-- 6.5 Imágenes: 5 locales + 5 externas -->
+    <section id="imagenes">
+      <h2>6.5 Imágenes</h2>
+
+      <h3>Imágenes Locales (coloca tus archivos en la carpeta <code>images/</code>)</h3>
+      <p class="note">Para que estas imágenes se vean, crea una carpeta llamada <code>images</code> al lado de este archivo y coloca dentro los archivos <code>local1.jpg</code> ... <code>local5.jpg</code>. Puedes usar cualquier formato: .jpg, .png, .webp.</p>
+      <div class="grid">
+        <figure>
+          <img src="C:\Users\Usuario\Desktop\Servidor\images\local1.png" alt="Foto local 1" />
+          <figcaption>Local 1</figcaption>
+        </figure>
+        <figure>
+          <img src="images/local2.png" alt="Foto local 2" />
+          <figcaption>Local 2</figcaption>
+        </figure>
+        <figure>
+          <img src="images/local3.png" alt="Foto local 3" />
+          <figcaption>Local 3</figcaption>
+        </figure>
+        <figure>
+          <img src="images/local4.png" alt="Foto local 4" />
+          <figcaption>Local 4</figcaption>
+        </figure>
+        <figure>
+          <img src="images/local5.jpg" alt="Foto local 5" />
+          <figcaption>Local 5</figcaption>
+        </figure>
+      </div>
+
+      <h3>Imágenes Externas (desde URL)</h3>
+      <div class="grid">
+        <figure>
+          <img src="https://picsum.photos/id/1015/600/400" alt="Paisaje externo 1" />
+          <figcaption>Externa 1</figcaption>
+        </figure>
+        <figure>
+          <img src="https://picsum.photos/id/1025/600/400" alt="Paisaje externo 2" />
+          <figcaption>Externa 2</figcaption>
+        </figure>
+        <figure>
+          <img src="https://picsum.photos/id/1041/600/400" alt="Paisaje externo 3" />
+          <figcaption>Externa 3</figcaption>
+        </figure>
+        <figure>
+          <img src="https://picsum.photos/id/1057/600/400" alt="Paisaje externo 4" />
+          <figcaption>Externa 4</figcaption>
+        </figure>
+        <figure>
+          <img src="https://picsum.photos/id/1069/600/400" alt="Paisaje externo 5" />
+          <figcaption>Externa 5</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 6.6 Multimedia: video de YouTube -->
+    <section id="multimedia">
+      <h2>6.6 Multimedia – Video de YouTube</h2>
+      <div class="note">Experimento 204 <code>GD</code> gameplay de Nexus.</div>
+      <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px;">
+        <iframe width="560" height="315" 
+        src="https://www.youtube.com/embed/i4Gg7V76rM0?si=50cOxLoOodTlZHYY" 
+        title="YouTube video player" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin"
+         allowfullscreen>
+        </iframe>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Hecho con ♥ para practicar HTML. Valida tu documento en <a href="https://validator.w3.org/" target="_blank" rel="noopener noreferrer">W3C Validator</a>.</p>
+  </footer>
+</body>
+</html>
