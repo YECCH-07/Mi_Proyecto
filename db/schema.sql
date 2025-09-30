@@ -28,12 +28,13 @@ CREATE TABLE institutions (
 -- Reports table: Stores all citizen complaints
 CREATE TABLE reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
+    user_id INTEGER,
+    tracking_id VARCHAR(20) UNIQUE NOT NULL, -- e.g., DU-2025-000001
     title VARCHAR(200) NOT NULL,
     description TEXT NOT NULL,
-    photo_url VARCHAR(500),
-    lat REAL,
-    lng REAL,
+    evidence_files TEXT, -- JSON array of file paths
+    lat REAL NOT NULL,
+    lng REAL NOT NULL,
     status VARCHAR(50) DEFAULT 'pending' CHECK(status IN ('pending', 'in_progress', 'resolved', 'rejected')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
