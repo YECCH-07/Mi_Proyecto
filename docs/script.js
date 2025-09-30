@@ -1,11 +1,14 @@
+let isMapInitialized = false;
+
 document.addEventListener('DOMContentLoaded', function() {
     showTab('login');
-    initializeMap();
     setupEventListeners();
 });
 
 function setupEventListeners() {
+    // Tab switching
     document.querySelectorAll('.nav-link').forEach(link => {
+        if (!link) return;
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const tabName = e.target.getAttribute('href').substring(1);
@@ -13,45 +16,59 @@ function setupEventListeners() {
         });
     });
 
-    document.getElementById('registroForm').addEventListener('submit', registrarUsuario);
-    document.getElementById('loginForm').addEventListener('submit', loginUsuario);
-    document.getElementById('denunciaForm').addEventListener('submit', registrarDenuncia);
+    // Form submissions
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) loginForm.addEventListener('submit', loginUsuario);
 
+    const registroForm = document.getElementById('registroForm');
+    if (registroForm) registroForm.addEventListener('submit', registrarUsuario);
+
+    const denunciaForm = document.getElementById('denunciaForm');
+    if (denunciaForm) denunciaForm.addEventListener('submit', registrarDenuncia);
+
+    // File preview
     const fileInput = document.getElementById('evidenceFiles');
-    fileInput.addEventListener('change', () => {
-        const previewContainer = document.getElementById('file-preview');
-        previewContainer.innerHTML = '';
-        const files = fileInput.files;
-        if (files.length > 5) {
-            alert('No puede seleccionar más de 5 archivos.');
-            fileInput.value = '';
-            return;
-        }
-        for (const file of files) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.createElement('img');
-                preview.src = e.target.result;
-                preview.style.height = '60px';
-                preview.style.margin = '5px';
-                preview.style.borderRadius = '5px';
-                previewContainer.appendChild(preview);
+    if (fileInput) {
+        fileInput.addEventListener('change', () => {
+            const previewContainer = document.getElementById('file-preview');
+            if (!previewContainer) return;
+            previewContainer.innerHTML = '';
+            const files = fileInput.files;
+            if (files.length > 5) {
+                alert('No puede seleccionar más de 5 archivos.');
+                fileInput.value = '';
+                return;
             }
-            if (file.type.startsWith('image/')) {
-                reader.readAsDataURL(file);
-            } else {
-                const fileIcon = document.createElement('div');
-                fileIcon.textContent = `📄 ${file.name}`;
-                fileIcon.style.margin = '5px';
-                previewContainer.appendChild(fileIcon);
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.createElement('img');
+                    preview.src = e.target.result;
+                    preview.style.height = '60px';
+                    preview.style.margin = '5px';
+                    preview.style.borderRadius = '5px';
+                    previewContainer.appendChild(preview);
+                }
+                if (file.type.startsWith('image/')) {
+                    reader.readAsDataURL(file);
+                } else {
+                    const fileIcon = document.createElement('div');
+                    fileIcon.textContent = `📄 ${file.name}`;
+                    fileIcon.style.margin = '5px';
+                    previewContainer.appendChild(fileIcon);
+                }
             }
-        }
-    });
+        });
+    }
 }
 
 function showTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        if (tab) tab.style.display = 'none';
+    });
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link) link.classList.remove('active');
+    });
     
     const selectedTab = document.getElementById(tabName);
     if (selectedTab) selectedTab.style.display = 'block';
@@ -59,8 +76,16 @@ function showTab(tabName) {
     const activeLink = document.querySelector(`.nav-link[href*="${tabName}"]`);
     if (activeLink) activeLink.classList.add('active');
 
-    if (tabName === 'denuncia' && typeof map !== 'undefined') {
-        setTimeout(() => map.invalidateSize(), 10);
+    if (tabName === 'denuncia') {
+        if (!isMapInitialized) {
+            initializeMap();
+            isMapInitialized = true;
+        } else {
+            // Ensure map is visible and sized correctly after tab switch
+            setTimeout(() => {
+                if (map) map.invalidateSize();
+            }, 10);
+        }
     }
 }
 
@@ -74,8 +99,12 @@ async function registrarDenuncia(e) {
 
     const token = localStorage.getItem('userToken');
     if (token) {
-        const userId = JSON.parse(atob(token.split('.')[1])).id;
-        formData.append('userId', userId);
+        try {
+            const userId = JSON.parse(atob(token.split('.')[1])).id;
+            formData.append('userId', userId);
+        } catch (error) {
+            console.error('Error decoding token:', error);
+        }
     }
 
     try {
@@ -101,14 +130,15 @@ async function registrarDenuncia(e) {
 async function registrarUsuario(e) {
     e.preventDefault();
     const form = document.getElementById('registroForm');
-    const data = new FormData(form);
-    const payload = Object.fromEntries(data.entries());
-    
-    // Remap names to match backend
-    payload.first_name = payload.firstName;
-    payload.last_name = payload.lastName;
-    delete payload.firstName;
-    delete payload.lastName;
+    const payload = {
+        dni: form.dni.value,
+        first_name: form.firstName.value,
+        last_name: form.lastName.value,
+        email: form.email.value,
+        phone: form.phone.value,
+        address: form.address.value,
+        password: form.password.value
+    };
 
     try {
         const response = await fetch('http://localhost:3000/api/users/citizens', {
@@ -133,14 +163,16 @@ async function registrarUsuario(e) {
 async function loginUsuario(e) {
     e.preventDefault();
     const form = document.getElementById('loginForm');
-    const data = new FormData(form);
-    const payload = Object.fromEntries(data.entries());
+    const payload = {
+        email: form.loginEmail.value,
+        password: form.loginPassword.value
+    };
 
     try {
         const response = await fetch('http://localhost:3000/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: payload.loginEmail, password: payload.loginPassword })
+            body: JSON.stringify(payload)
         });
         const result = await response.json();
         if (response.ok) {

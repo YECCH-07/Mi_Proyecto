@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="style.css">
     <script>
-        // Declare map variables in the global scope to be shared across script files
         let map, marker;
     </script>
 </head>
@@ -22,16 +21,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showTab('login')">Login</a>
+                        <a class="nav-link" href="#login">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showTab('registro')">Registro</a>
+                        <a class="nav-link" href="#registro">Registro</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showTab('denuncia')">Nueva Denuncia</a>
+                        <a class="nav-link" href="#denuncia">Nueva Denuncia</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showTab('seguimiento')">Seguimiento</a>
+                        <a class="nav-link" href="#seguimiento">Seguimiento</a>
                     </li>
                 </ul>
             </div>
@@ -49,11 +48,11 @@
                             <form id="loginForm">
                                 <div class="mb-3">
                                     <label for="loginEmail" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="loginEmail" required>
+                                    <input type="email" class="form-control" id="loginEmail" name="loginEmail" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="loginPassword" class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" id="loginPassword" required>
+                                    <input type="password" class="form-control" id="loginPassword" name="loginPassword" required>
                                 </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-primary">Ingresar</button>
@@ -75,31 +74,31 @@
                             <form id="registroForm">
                                 <div class="mb-3">
                                     <label for="dni" class="form-label">DNI</label>
-                                    <input type="text" class="form-control" id="dni" required>
+                                    <input type="text" class="form-control" id="dni" name="dni" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="firstName" class="form-label">Nombres</label>
-                                    <input type="text" class="form-control" id="firstName" required>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="lastName" class="form-label">Apellidos</label>
-                                    <input type="text" class="form-control" id="lastName" required>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" required>
+                                    <input type="email" class="form-control" id="email" name="email" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="phone" class="form-label">Teléfono</label>
-                                    <input type="tel" class="form-control" id="phone" required>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="address" class="form-label">Dirección</label>
-                                    <input type="text" class="form-control" id="address" required>
+                                    <input type="text" class="form-control" id="address" name="address" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" id="password" required>
+                                    <input type="password" class="form-control" id="password" name="password" required>
                                 </div>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-success">Registrarse</button>
