@@ -1,7 +1,14 @@
 let isMapInitialized = false;
 
 document.addEventListener('DOMContentLoaded', function() {
-    showTab('login');
+    const hash = window.location.hash;
+    if (hash) {
+        // e.g., from #denuncia to denuncia
+        const tabName = hash.substring(1);
+        showTab(tabName);
+    } else {
+        showTab('login');
+    }
     setupEventListeners();
 });
 
