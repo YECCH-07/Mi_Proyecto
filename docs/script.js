@@ -1,12 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Show the login tab by default
     showTab('login');
-    initializeMap(); // This function is now in map.js
+    initializeMap();
     setupEventListeners();
 });
 
 function setupEventListeners() {
-    // Tab switching
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
@@ -15,20 +13,18 @@ function setupEventListeners() {
         });
     });
 
-    // Form submissions
     document.getElementById('registroForm').addEventListener('submit', registrarUsuario);
     document.getElementById('loginForm').addEventListener('submit', loginUsuario);
     document.getElementById('denunciaForm').addEventListener('submit', registrarDenuncia);
 
-    // File preview
     const fileInput = document.getElementById('evidenceFiles');
     fileInput.addEventListener('change', () => {
         const previewContainer = document.getElementById('file-preview');
-        previewContainer.innerHTML = ''; // Clear previous previews
+        previewContainer.innerHTML = '';
         const files = fileInput.files;
         if (files.length > 5) {
             alert('No puede seleccionar más de 5 archivos.');
-            fileInput.value = ''; // Clear the selection
+            fileInput.value = '';
             return;
         }
         for (const file of files) {
@@ -44,7 +40,6 @@ function setupEventListeners() {
             if (file.type.startsWith('image/')) {
                 reader.readAsDataURL(file);
             } else {
-                // For non-image files like PDF
                 const fileIcon = document.createElement('div');
                 fileIcon.textContent = `📄 ${file.name}`;
                 fileIcon.style.margin = '5px';
@@ -64,13 +59,10 @@ function showTab(tabName) {
     const activeLink = document.querySelector(`.nav-link[href*="${tabName}"]`);
     if (activeLink) activeLink.classList.add('active');
 
-    // Refresh map size if the denuncia tab is shown
     if (tabName === 'denuncia' && typeof map !== 'undefined') {
         setTimeout(() => map.invalidateSize(), 10);
     }
 }
-
-// --- FORM HANDLERS ---
 
 async function registrarDenuncia(e) {
     e.preventDefault();
@@ -91,9 +83,7 @@ async function registrarDenuncia(e) {
             method: 'POST',
             body: formData
         });
-
         const result = await response.json();
-
         if (response.ok) {
             alert(`Denuncia registrada con éxito.\nSu código de seguimiento es: ${result.trackingId}`);
             form.reset();
@@ -110,23 +100,49 @@ async function registrarDenuncia(e) {
 
 async function registrarUsuario(e) {
     e.preventDefault();
-    // Logic for user registration
+    const form = document.getElementById('registroForm');
+    const data = new FormData(form);
+    const payload = Object.fromEntries(data.entries());
+    
+    // Remap names to match backend
+    payload.first_name = payload.firstName;
+    payload.last_name = payload.lastName;
+    delete payload.firstName;
+    delete payload.lastName;
+
+    try {
+        const response = await fetch('http://localhost:3000/api/users/citizens', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (response.ok) {
+            alert(result.message);
+            form.reset();
+            showTab('login');
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Registration failed:', error);
+        alert('No se pudo conectar con el servidor.');
+    }
 }
 
 async function loginUsuario(e) {
     e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
+    const form = document.getElementById('loginForm');
+    const data = new FormData(form);
+    const payload = Object.fromEntries(data.entries());
 
     try {
         const response = await fetch('http://localhost:3000/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email: payload.loginEmail, password: payload.loginPassword })
         });
-
         const result = await response.json();
-
         if (response.ok) {
             localStorage.setItem('userToken', result.token);
             alert(result.message);
@@ -136,6 +152,6 @@ async function loginUsuario(e) {
         }
     } catch (error) {
         console.error('Login failed:', error);
-        alert('No se pudo conectar con el servidor. Inténtelo más tarde.');
+        alert('No se pudo conectar con el servidor.');
     }
 }
