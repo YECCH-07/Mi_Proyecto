@@ -2,13 +2,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const slider = document.querySelector('.bg-slider');
     const images = [
-        '../images/foto principal 2.jpg',
-        '../images/foto principal 3.jpg',
-        '../images/foto principal 4.jpg',
-        '../images/foto principal.jpg',
-        '../images/Imagen de  portada 2.jpg',
-        '../images/Imagen de  portada.jpg',
-        '../images/seguridad ciudadana.jpg'
+        //'images/foto principal 2.jpg',
+        //'images/foto principal 3.jpg',
+        //'images/foto principal 4.jpg',
+        'images/foto principal.jpg',
+        //'images/Imagen de  portada 2.jpg',
+        //'images/Imagen de  portada.jpg',
+        //'images/seguridad ciudadana.jpg'
     ];
 
     let currentImageIndex = 0;
