@@ -1,5 +1,3 @@
-let map, marker;
-
 function initializeMap() {
     const defaultCoords = [-12.046374, -77.042793]; // Lima, Peru
     map = L.map('map').setView(defaultCoords, 13);
