@@ -81,8 +81,14 @@ router.post('/', async (req, res) => {
         const { title, description, lat, lng, userId } = req.body;
 
         // Validation
-        if (!title || !description || !lat || !lng) {
-            return res.status(400).json({ error: 'Missing required fields: title, description, lat, lng.' });
+        if (!title || title.trim().length < 3) {
+            return res.status(400).json({ error: 'El título es obligatorio y debe tener al menos 3 caracteres.' });
+        }
+        if (!description || description.trim().length < 10) {
+            return res.status(400).json({ error: 'La descripción es obligatoria y debe tener al menos 10 caracteres.' });
+        }
+        if (!lat || !lng) {
+            return res.status(400).json({ error: 'Coordenadas lat y lng son obligatorias.' });
         }
 
         try {
