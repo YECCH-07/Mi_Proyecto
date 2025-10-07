@@ -1,213 +1,474 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Denuncias Ciudadanas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <link rel="stylesheet" href="main.css">
-    <script>
-        let map, marker;
-    </script>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Plataforma de Denuncias</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#login">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#registro">Registro</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#denuncia">Nueva Denuncia</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#seguimiento">Seguimiento</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+// main.js - Sistema completo de denuncias
 
-    <div class="container mt-4">
-        <!-- TAB LOGIN -->
-        <div id="login" class="tab-content">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title">Acceso de Usuario</h2>
-                    <div class="row justify-content-center">
-                        <div class="col-md-6">
-                            <form id="loginForm">
-                                <div class="mb-3">
-                                    <label for="loginEmail" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="loginEmail" name="loginEmail" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="loginPassword" class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" id="loginPassword" name="loginPassword" required>
-                                </div>
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary">Ingresar</button>
-                                </div>
-                            </form>
+// Configuración
+const API_URL = 'http://localhost:3000/api';
+
+// Variables globales
+let currentUser = null;
+
+// ==============================================
+// INICIALIZACIÓN
+// ==============================================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Sistema de denuncias cargado');
+    
+    // Verificar conexión con servidor
+    checkServerConnection();
+    
+    // Cargar usuario de sesión si existe
+    loadUserSession();
+    
+    // Configurar navegación entre tabs
+    setupNavigation();
+    
+    // Configurar formularios
+    setupLoginForm();
+    setupRegistroForm();
+    setupDenunciaForm();
+    setupSeguimientoForm();
+    
+    // Mostrar tab inicial (login por defecto)
+    showTab('login');
+});
+
+// ==============================================
+// NAVEGACIÓN
+// ==============================================
+function setupNavigation() {
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const href = link.getAttribute('href');
+            const tabId = href.replace('#', '');
+            showTab(tabId);
+        });
+    });
+}
+
+function showTab(tabId) {
+    // Ocultar todos los tabs
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+        tab.style.display = 'none';
+    });
+    
+    // Mostrar tab seleccionado
+    const selectedTab = document.getElementById(tabId);
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+    }
+    
+    // Actualizar nav activo
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    const activeLink = document.querySelector(`a[href="#${tabId}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+    }
+    
+    console.log('Mostrando tab:', tabId);
+}
+
+// ==============================================
+// SESIÓN DE USUARIO
+// ==============================================
+function loadUserSession() {
+    const user = localStorage.getItem('currentUser');
+    if (user) {
+        currentUser = JSON.parse(user);
+        console.log('Usuario en sesión:', currentUser);
+        updateNavbarForLoggedUser();
+    }
+}
+
+function saveUserSession(user) {
+    currentUser = user;
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    updateNavbarForLoggedUser();
+}
+
+function clearUserSession() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    location.reload();
+}
+
+function updateNavbarForLoggedUser() {
+    if (currentUser) {
+        const navbar = document.querySelector('.navbar-nav');
+        navbar.innerHTML = `
+            <li class="nav-item">
+                <span class="nav-link">Hola, ${currentUser.first_name}</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#denuncia">Nueva Denuncia</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#seguimiento">Seguimiento</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="clearUserSession()">Cerrar Sesión</a>
+            </li>
+        `;
+        setupNavigation();
+    }
+}
+
+// ==============================================
+// FORMULARIO LOGIN
+// ==============================================
+function setupLoginForm() {
+    const form = document.getElementById('loginForm');
+    if (!form) return;
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Iniciando sesión...';
+        
+        try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                alert('¡Inicio de sesión exitoso!');
+                saveUserSession(result.user);
+                showTab('denuncia');
+                form.reset();
+            } else {
+                throw new Error(result.error || 'Error al iniciar sesión');
+            }
+        } catch (error) {
+            console.error('Error login:', error);
+            alert('Error: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Ingresar';
+        }
+    });
+}
+
+// ==============================================
+// FORMULARIO REGISTRO
+// ==============================================
+function setupRegistroForm() {
+    const form = document.getElementById('registroForm');
+    if (!form) return;
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+            dni: document.getElementById('dni').value,
+            first_name: document.getElementById('firstName').value,
+            last_name: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value,
+            password: document.getElementById('password').value,
+            user_type: 'citizen'
+        };
+        
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Registrando...';
+        
+        try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+                showTab('login');
+                form.reset();
+            } else {
+                throw new Error(result.error || 'Error al registrarse');
+            }
+        } catch (error) {
+            console.error('Error registro:', error);
+            alert('Error: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Registrarse';
+        }
+    });
+}
+
+// ==============================================
+// FORMULARIO DENUNCIA
+// ==============================================
+function setupDenunciaForm() {
+    const form = document.getElementById('denunciaForm');
+    if (!form) return;
+    
+    // Preview de archivos
+    const fileInput = document.getElementById('evidenceFiles');
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFilePreview);
+    }
+    
+    // Submit
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Validar ubicación
+        const lat = document.getElementById('lat').value;
+        const lng = document.getElementById('lng').value;
+        
+        if (!lat || !lng) {
+            alert('Por favor, marca la ubicación del problema en el mapa');
+            return;
+        }
+        
+        // Crear FormData
+        const formData = new FormData();
+        
+        // Obtener categoría seleccionada
+        const categorySelect = document.getElementById('category');
+        const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+        const category = selectedOption.value;
+        const title = selectedOption.text; // Usar el texto completo como título
+        
+        // Agregar campos
+        formData.append('title', title);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('category', category);
+        formData.append('lat', lat);
+        formData.append('lng', lng);
+        formData.append('address', document.getElementById('locationAddress').value);
+        
+        // Agregar userId si está logueado
+        if (currentUser) {
+            formData.append('userId', currentUser.user_id);
+        }
+        
+        // Agregar archivos
+        const files = fileInput.files;
+        for (let i = 0; i < files.length && i < 5; i++) {
+            formData.append('evidenceFiles', files[i]);
+        }
+        
+        console.log('Enviando denuncia...');
+        console.log('Título:', title);
+        console.log('Categoría:', category);
+        console.log('Ubicación:', lat, lng);
+        console.log('Archivos:', files.length);
+        
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Enviando denuncia...';
+        
+        try {
+            const response = await fetch(`${API_URL}/denuncias`, {
+                method: 'POST',
+                body: formData
+                // NO incluir Content-Type, fetch lo maneja automáticamente
+            });
+            
+            const result = await response.json();
+            console.log('Respuesta del servidor:', result);
+            
+            if (response.ok && result.success) {
+                alert(`¡Denuncia creada exitosamente!\n\nNúmero de seguimiento: ${result.trackingId}\n\nGuarda este número para consultar el estado de tu denuncia.`);
+                
+                // Limpiar formulario
+                form.reset();
+                document.getElementById('file-preview').innerHTML = '';
+                
+                // Resetear mapa si existe
+                if (window.resetMap) {
+                    window.resetMap();
+                }
+                
+                // Ir a seguimiento
+                showTab('seguimiento');
+            } else {
+                throw new Error(result.error || 'Error al crear la denuncia');
+            }
+        } catch (error) {
+            console.error('Error al enviar denuncia:', error);
+            alert('Error al enviar la denuncia: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Enviar Denuncia';
+        }
+    });
+}
+
+// Preview de archivos
+function handleFilePreview(event) {
+    const files = event.target.files;
+    const preview = document.getElementById('file-preview');
+    
+    if (!preview) return;
+    
+    preview.innerHTML = '';
+    
+    if (files.length > 5) {
+        alert('Máximo 5 archivos permitidos');
+        event.target.value = '';
+        return;
+    }
+    
+    Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            const div = document.createElement('div');
+            div.className = 'd-inline-block m-2';
+            div.innerHTML = `
+                <img src="${e.target.result}" 
+                     alt="Preview ${index + 1}" 
+                     style="max-width: 100px; max-height: 100px; border-radius: 4px; border: 1px solid #ddd;">
+                <p class="text-center small">${file.name}</p>
+            `;
+            preview.appendChild(div);
+        };
+        
+        if (file.type.startsWith('image/')) {
+            reader.readAsDataURL(file);
+        } else {
+            const div = document.createElement('div');
+            div.className = 'd-inline-block m-2';
+            div.innerHTML = `
+                <div style="width: 100px; height: 100px; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                    <span>📄 PDF</span>
+                </div>
+                <p class="text-center small">${file.name}</p>
+            `;
+            preview.appendChild(div);
+        }
+    });
+}
+
+// ==============================================
+// FORMULARIO SEGUIMIENTO
+// ==============================================
+function setupSeguimientoForm() {
+    const btn = document.getElementById('searchReportBtn');
+    if (!btn) return;
+    
+    btn.addEventListener('click', async () => {
+        const trackingId = document.getElementById('trackingIdInput').value.trim();
+        
+        if (!trackingId) {
+            alert('Por favor, ingresa un código de seguimiento');
+            return;
+        }
+        
+        console.log('Buscando denuncia:', trackingId);
+        
+        btn.disabled = true;
+        btn.textContent = 'Buscando...';
+        
+        try {
+            const response = await fetch(`${API_URL}/denuncias`);
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                const report = result.reports.find(r => r.tracking_id === trackingId);
+                
+                if (report) {
+                    displayReportStatus(report);
+                } else {
+                    document.getElementById('reportStatusResult').innerHTML = `
+                        <div class="alert alert-warning">
+                            No se encontró ninguna denuncia con el código: ${trackingId}
                         </div>
-                    </div>
+                    `;
+                }
+            } else {
+                throw new Error('Error al buscar la denuncia');
+            }
+        } catch (error) {
+            console.error('Error búsqueda:', error);
+            document.getElementById('reportStatusResult').innerHTML = `
+                <div class="alert alert-danger">
+                    Error al buscar la denuncia: ${error.message}
+                </div>
+            `;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Buscar';
+        }
+    });
+}
+
+function displayReportStatus(report) {
+    const statusColors = {
+        'received': 'warning',
+        'in_progress': 'info',
+        'resolved': 'success',
+        'rejected': 'danger'
+    };
+    
+    const statusTexts = {
+        'received': 'Recibida',
+        'in_progress': 'En Proceso',
+        'resolved': 'Resuelta',
+        'rejected': 'Rechazada'
+    };
+    
+    const color = statusColors[report.status] || 'secondary';
+    const statusText = statusTexts[report.status] || report.status;
+    
+    const html = `
+        <div class="card">
+            <div class="card-header">
+                <h5>Denuncia ${report.tracking_id}</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-title">${report.title}</h6>
+                <p class="card-text"><strong>Categoría:</strong> ${report.category || 'No especificada'}</p>
+                <p class="card-text"><strong>Fecha de creación:</strong> ${new Date(report.created_at).toLocaleString('es-PE')}</p>
+                <div class="alert alert-${color}">
+                    <strong>Estado actual:</strong> ${statusText}
                 </div>
             </div>
         </div>
+    `;
+    
+    document.getElementById('reportStatusResult').innerHTML = html;
+}
 
-        <!-- TAB REGISTRO -->
-        <div id="registro" class="tab-content">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title">Registro de Ciudadano</h2>
-                    <div class="row justify-content-center">
-                        <div class="col-md-6">
-                            <form id="registroForm">
-                                <div class="mb-3">
-                                    <label for="dni" class="form-label">DNI</label>
-                                    <input type="text" class="form-control" id="dni" name="dni" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="firstName" class="form-label">Nombres</label>
-                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="lastName" class="form-label">Apellidos</label>
-                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="phone" class="form-label">Teléfono</label>
-                                    <input type="tel" class="form-control" id="phone" name="phone" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="address" class="form-label">Dirección</label>
-                                    <input type="text" class="form-control" id="address" name="address" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                </div>
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-success">Registrarse</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+// ==============================================
+// UTILIDADES
+// ==============================================
+async function checkServerConnection() {
+    try {
+        const response = await fetch(`${API_URL}/health`);
+        const data = await response.json();
+        console.log('✓ Conexión con servidor OK:', data);
+        return true;
+    } catch (error) {
+        console.error('✗ No se puede conectar con el servidor:', error);
+        console.error('Asegúrate de que el servidor esté corriendo en http://localhost:3000');
+        
+        // Mostrar alerta solo una vez
+        if (!sessionStorage.getItem('serverErrorShown')) {
+            alert('⚠️ No se puede conectar con el servidor.\n\nAsegúrate de que esté corriendo:\ncd backend\nnode src/index.js');
+            sessionStorage.setItem('serverErrorShown', 'true');
+        }
+        return false;
+    }
+}
 
-        <!-- TAB DENUNCIA -->
-        <div id="denuncia" class="tab-content">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title">Registrar Nueva Denuncia</h2>
-                    <form id="denunciaForm" enctype="multipart/form-data">
-                        <div class="row">
-                            <!-- Columna Izquierda: Formulario -->
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="category" class="form-label">Categoría del Problema</label>
-                                    <select class="form-select" id="category" name="title" required>
-                                        <option value="" disabled selected>Seleccione una categoría...</option>
-                                        <optgroup label="Infraestructura Vial">
-                                            <option value="Baches">Baches y deterioro de calzada</option>
-                                            <option value="Semáforos">Semáforos defectuosos</option>
-                                            <option value="Señalización">Falta o daño de señalización</option>
-                                        </optgroup>
-                                        <optgroup label="Servicios Públicos">
-                                            <option value="Alumbrado">Fallas en alumbrado público</option>
-                                            <option value="Agua">Fugas de agua</option>
-                                            <option value="Desagüe">Atoros o colapso de desagüe</option>
-                                        </optgroup>
-                                        <optgroup label="Limpieza Pública">
-                                            <option value="Basura">Acumulación de basura</option>
-                                            <option value="Maleza">Crecimiento de maleza en áreas públicas</option>
-                                            <option value="Residuos">Arrojo de desmonte o residuos</option>
-                                        </optgroup>
-                                        <optgroup label="Seguridad Urbana">
-                                            <option value="Espacios Públicos">Falta de mantenimiento en parques</option>
-                                            <option value="Vandalismo">Vandalismo en propiedad pública</option>
-                                        </optgroup>
-                                        <optgroup label="Medio Ambiente">
-                                            <option value="Contaminación">Contaminación del aire o agua</option>
-                                            <option value="Ruido">Ruido excesivo</option>
-                                        </optgroup>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Descripción Detallada</label>
-                                    <textarea class="form-control" id="description" name="description" rows="5" placeholder="Describa el problema, la urgencia y cualquier otro dato relevante." required></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="evidenceFiles" class="form-label">Adjuntar Evidencia (Fotos o PDF, máx. 5)</label>
-                                    <input class="form-control" type="file" id="evidenceFiles" name="evidenceFiles" multiple accept=".jpg, .jpeg, .png, .pdf">
-                                </div>
-                                 <div id="file-preview" class="mb-3"></div>
-                            </div>
-
-                            <!-- Columna Derecha: Mapa -->
-                            <div class="col-md-6">
-                                <label class="form-label">Ubicación del Problema</label>
-                                <p class="form-text text-muted">Arrastra el marcador al punto exacto.</p>
-                                <div id="map" style="height: 350px; border-radius: 8px; border: 1px solid #ddd;"></div>
-                                <input type="hidden" id="lat" name="lat">
-                                <input type="hidden" id="lng" name="lng">
-                                <div class="mt-2">
-                                    <label for="locationAddress" class="form-label">Dirección Detectada</label>
-                                    <input type="text" class="form-control" id="locationAddress" placeholder="La dirección aparecerá aquí..." readonly>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-grid mt-3">
-                            <button type="submit" class="btn btn-primary">Enviar Denuncia</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB SEGUIMIENTO -->
-        <div id="seguimiento" class="tab-content">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title">Seguimiento de Denuncia</h2>
-                    <div class="row justify-content-center">
-                        <div class="col-md-8">
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Ingrese su código de seguimiento (ej. DU-2025-000001)" id="trackingIdInput">
-                                <button class="btn btn-outline-secondary" type="button" id="searchReportBtn">Buscar</button>
-                            </div>
-                            <div id="reportStatusResult"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="footer">
-        <div class="container">
-            <span>&copy; 2025 Plataforma de Denuncias Ciudadanas. Todos los derechos reservados.</span>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="map.js"></script>
-    <script src="main.js"></script>
-</body>
-</html>
+// Exponer función para cerrar sesión globalmente
+window.clearUserSession = clearUserSession;

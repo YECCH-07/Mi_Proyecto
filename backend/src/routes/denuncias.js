@@ -7,11 +7,9 @@ const path = require('path');
 // --- Multer Configuration for File Uploads ---
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        // The destination folder for uploads
-        cb(null, 'public/uploads/');
+        cb(null, path.join(__dirname, '../../public/uploads/'));
     },
     filename: function (req, file, cb) {
-        // Create a unique filename to avoid overwrites
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
@@ -19,29 +17,29 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB file size limit
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
     fileFilter: function (req, file, cb) {
-        // Allowed file types
         const filetypes = /jpeg|jpg|png|pdf/;
         const mimetype = filetypes.test(file.mimetype);
         const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        
         if (mimetype && extname) {
             return cb(null, true);
         }
-        cb("Error: File upload only supports the following filetypes - " + filetypes);
+        cb(new Error("Solo se permiten archivos: jpeg, jpg, png, pdf"));
     }
-}).array('evidenceFiles', 5); // Field name 'evidenceFiles', max 5 files
+}).array('evidenceFiles', 5);
 
 // --- Helper function to generate unique tracking ID ---
 async function generateTrackingId() {
     return new Promise((resolve, reject) => {
         const year = new Date().getFullYear();
-        const prefix = `DU-${year}-`;
+        const prefix = `DEN-${year}-`;
 
-        // Find the last ID for the current year to create a sequential number
         const sql = `SELECT tracking_id FROM reports WHERE tracking_id LIKE ? ORDER BY tracking_id DESC LIMIT 1`;
         db.get(sql, [`${prefix}%`], (err, row) => {
             if (err) {
+                console.error('Error generating tracking ID:', err);
                 return reject('Database error while generating tracking ID');
             }
 
@@ -51,7 +49,6 @@ async function generateTrackingId() {
                 nextId = lastId + 1;
             }
 
-            // Format the number with leading zeros
             const sequentialNumber = nextId.toString().padStart(6, '0');
             resolve(prefix + sequentialNumber);
         });
@@ -60,52 +57,179 @@ async function generateTrackingId() {
 
 // --- Routes ---
 
-// GET all reports (basic version)
+// GET all reports
 router.get('/', (req, res) => {
-    const sql = `SELECT id, tracking_id, title, status, created_at FROM reports ORDER BY created_at DESC`;
+    console.log('GET /api/denuncias - Fetching all reports');
+    
+    const sql = `SELECT id, tracking_id, title, category, status, created_at FROM reports ORDER BY created_at DESC`;
     db.all(sql, [], (err, rows) => {
         if (err) {
+            console.error('Error fetching reports:', err);
             return res.status(500).json({ error: err.message });
         }
-        res.json({ reports: rows });
+        console.log(`✓ Found ${rows.length} reports`);
+        res.json({ success: true, reports: rows });
+    });
+});
+
+// GET single report by ID
+router.get('/:id', (req, res) => {
+    const { id } = req.params;
+    console.log(`GET /api/denuncias/${id} - Fetching report`);
+    
+    const sql = `SELECT * FROM reports WHERE id = ?`;
+    db.get(sql, [id], (err, row) => {
+        if (err) {
+            console.error('Error fetching report:', err);
+            return res.status(500).json({ error: err.message });
+        }
+        if (!row) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+        
+        // Parse evidence files JSON
+        if (row.evidence_files) {
+            try {
+                row.evidence_files = JSON.parse(row.evidence_files);
+            } catch (e) {
+                row.evidence_files = [];
+            }
+        }
+        
+        res.json({ success: true, report: row });
     });
 });
 
 // POST a new report
 router.post('/', async (req, res) => {
+    console.log('POST /api/denuncias - Creating new report');
+    
     upload(req, res, async function (err) {
         if (err) {
-            return res.status(400).json({ error: err.message || 'Error uploading files.' });
+            console.error('Upload error:', err);
+            return res.status(400).json({ 
+                success: false,
+                error: err.message || 'Error uploading files.' 
+            });
         }
 
-        const { title, description, lat, lng, userId } = req.body;
+        console.log('Request body:', req.body);
+        console.log('Uploaded files:', req.files?.length || 0);
+
+        const { title, description, category, lat, lng, address, userId } = req.body;
 
         // Validation
         if (!title || !description || !lat || !lng) {
-            return res.status(400).json({ error: 'Missing required fields: title, description, lat, lng.' });
+            console.error('Missing required fields');
+            return res.status(400).json({ 
+                success: false,
+                error: 'Faltan campos requeridos: título, descripción, latitud, longitud.' 
+            });
         }
 
         try {
             const trackingId = await generateTrackingId();
-            const files = req.files ? req.files.map(file => file.path) : [];
+            console.log('Generated tracking ID:', trackingId);
+            
+            const files = req.files ? req.files.map(file => `/uploads/${path.basename(file.path)}`) : [];
             const evidenceFiles = JSON.stringify(files);
 
-            const sql = `INSERT INTO reports (user_id, tracking_id, title, description, lat, lng, evidence_files) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-            const params = [userId || null, trackingId, title, description, lat, lng, evidenceFiles];
+            const sql = `INSERT INTO reports (user_id, tracking_id, title, description, category, lat, lng, address, evidence_files, status) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'received')`;
+            const params = [
+                userId || null, 
+                trackingId, 
+                title, 
+                description, 
+                category || 'otro',
+                parseFloat(lat), 
+                parseFloat(lng), 
+                address || '',
+                evidenceFiles
+            ];
 
             db.run(sql, params, function (err) {
                 if (err) {
-                    return res.status(500).json({ error: err.message });
+                    console.error('Database insert error:', err);
+                    return res.status(500).json({ 
+                        success: false,
+                        error: err.message 
+                    });
                 }
+                
+                console.log(`✓ Report created successfully with ID: ${this.lastID}`);
+                
                 res.status(201).json({
-                    message: 'Report created successfully',
+                    success: true,
+                    message: 'Denuncia creada exitosamente',
                     reportId: this.lastID,
-                    trackingId: trackingId
+                    trackingId: trackingId,
+                    files: files
                 });
             });
         } catch (error) {
-            res.status(500).json({ error: error.toString() });
+            console.error('Error creating report:', error);
+            res.status(500).json({ 
+                success: false,
+                error: error.toString() 
+            });
         }
+    });
+});
+
+// PUT update report status
+router.put('/:id/status', (req, res) => {
+    const { id } = req.params;
+    const { status, comment, userId } = req.body;
+    
+    console.log(`PUT /api/denuncias/${id}/status - Updating status to ${status}`);
+    
+    if (!status) {
+        return res.status(400).json({ 
+            success: false,
+            error: 'Status is required' 
+        });
+    }
+    
+    // Get current status first
+    db.get('SELECT status FROM reports WHERE id = ?', [id], (err, row) => {
+        if (err || !row) {
+            return res.status(404).json({ 
+                success: false,
+                error: 'Report not found' 
+            });
+        }
+        
+        const previousStatus = row.status;
+        
+        // Update report status
+        const updateSql = `UPDATE reports SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+        db.run(updateSql, [status, id], function (err) {
+            if (err) {
+                console.error('Error updating status:', err);
+                return res.status(500).json({ 
+                    success: false,
+                    error: err.message 
+                });
+            }
+            
+            // Insert tracking record
+            const trackingSql = `INSERT INTO report_tracking (report_id, user_id, previous_status, new_status, comment) 
+                                VALUES (?, ?, ?, ?, ?)`;
+            db.run(trackingSql, [id, userId, previousStatus, status, comment || ''], (err) => {
+                if (err) {
+                    console.error('Error inserting tracking:', err);
+                }
+                
+                console.log(`✓ Status updated: ${previousStatus} → ${status}`);
+                res.json({ 
+                    success: true,
+                    message: 'Estado actualizado correctamente',
+                    previousStatus,
+                    newStatus: status
+                });
+            });
+        });
     });
 });
 
