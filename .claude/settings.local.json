@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(mysql:*)",
+      "Bash(if [ ! -f \"C:/xampp/htdocs/DENUNCIA CIUDADANA/backend/.env\" ])",
+      "Bash(then echo \"DB_HOST=localhost\nDB_NAME=denuncia_ciudadana\nDB_USER=root\nDB_PASS=\")",
+      "Bash(else echo \"✓ Archivo .env ya existe\")",
+      "Bash(fi)",
+      "Bash(test:*)",
+      "Bash(npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(dir:*)",
+      "Bash(php:*)",
+      "Bash(if [ -f \"C:/xampp/htdocs/DENUNCIA CIUDADANA/backend/.env\" ])",
+      "Bash(then cat \"C:/xampp/htdocs/DENUNCIA CIUDADANA/backend/.env\")",
+      "Bash(else echo \"❌ Archivo .env NO existe\")",
+      "Bash(if [ -f \"C:/xampp/htdocs/DENUNCIA CIUDADANA/backend/vendor/autoload.php\" ])",
+      "Bash(then echo \"✓ vendor/autoload.php EXISTE\")",
+      "Bash(else echo \"❌ vendor/autoload.php NO EXISTE\")",
+      "Bash(if [ -d \"C:/xampp/htdocs/DENUNCIA CIUDADANA/backend/vendor/firebase\" ])",
+      "Bash(then echo \"✓ Firebase JWT instalado\")",
+      "Bash(else echo \"❌ Firebase JWT NO instalado\")",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(git remote add:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git reset:*)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
