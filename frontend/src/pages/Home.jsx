@@ -58,7 +58,7 @@ export default function Home() {
             </div>
 
             {/* Nombre del lugar actual */}
-            <div className="fixed top-20 right-8 z-10 bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg">
+            <div className="fixed top-24 right-8 z-40 bg-black/30 backdrop-blur-sm px-4 py-2 rounded-lg">
                 <p className="text-white text-sm font-semibold">
                     📍 {images[currentImage].name}
                 </p>
