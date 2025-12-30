@@ -81,13 +81,13 @@ export default function Home() {
                     <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
                         <Link
                             to="/consulta"
-                            className="bg-white/95 hover:bg-white text-primary font-bold py-4 px-8 rounded-lg shadow-xl backdrop-blur-sm transition transform hover:scale-105 text-center"
+                            className="bg-white/80 hover:bg-white/90 text-primary font-bold py-4 px-8 rounded-lg shadow-xl backdrop-blur-md transition transform hover:scale-105 text-center"
                         >
                             🔍 Consultar mi Denuncia
                         </Link>
                         <Link
                             to="/register"
-                            className="bg-primary/95 hover:bg-primary text-white font-bold py-4 px-8 rounded-lg shadow-xl backdrop-blur-sm transition transform hover:scale-105 text-center"
+                            className="bg-primary/85 hover:bg-primary/95 text-white font-bold py-4 px-8 rounded-lg shadow-xl backdrop-blur-md transition transform hover:scale-105 text-center"
                         >
                             📝 Registrar Nueva Denuncia
                         </Link>
@@ -95,7 +95,7 @@ export default function Home() {
 
                     {/* Features Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                        <div className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-xl text-center transform hover:scale-105 transition">
+                        <div className="bg-white/75 backdrop-blur-md p-8 rounded-lg shadow-xl text-center transform hover:scale-105 hover:bg-white/85 transition">
                             <div className="text-5xl mb-4">📍</div>
                             <h3 className="text-xl font-bold text-gray-800 mb-2">Geolocalización</h3>
                             <p className="text-gray-600">
@@ -103,7 +103,7 @@ export default function Home() {
                             </p>
                         </div>
 
-                        <div className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-xl text-center transform hover:scale-105 transition">
+                        <div className="bg-white/75 backdrop-blur-md p-8 rounded-lg shadow-xl text-center transform hover:scale-105 hover:bg-white/85 transition">
                             <div className="text-5xl mb-4">⚡</div>
                             <h3 className="text-xl font-bold text-gray-800 mb-2">Seguimiento en Tiempo Real</h3>
                             <p className="text-gray-600">
@@ -111,7 +111,7 @@ export default function Home() {
                             </p>
                         </div>
 
-                        <div className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-xl text-center transform hover:scale-105 transition">
+                        <div className="bg-white/75 backdrop-blur-md p-8 rounded-lg shadow-xl text-center transform hover:scale-105 hover:bg-white/85 transition">
                             <div className="text-5xl mb-4">🔒</div>
                             <h3 className="text-xl font-bold text-gray-800 mb-2">Seguridad y Privacidad</h3>
                             <p className="text-gray-600">
@@ -121,7 +121,7 @@ export default function Home() {
                     </div>
 
                     {/* How it Works */}
-                    <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-xl p-8 mb-16">
+                    <div className="bg-white/80 backdrop-blur-md rounded-lg shadow-xl p-8 mb-16">
                         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
                             ¿Cómo Funciona?
                         </h2>
@@ -163,19 +163,19 @@ export default function Home() {
                             Tipos de Denuncias que Puedes Reportar
                         </h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition">
+                            <div className="bg-white/75 backdrop-blur-md p-4 rounded-lg shadow-lg hover:shadow-xl hover:bg-white/85 transition transform hover:scale-105">
                                 <div className="text-3xl mb-2">🚧</div>
                                 <p className="font-semibold">Baches en la Vía</p>
                             </div>
-                            <div className="bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition">
+                            <div className="bg-white/75 backdrop-blur-md p-4 rounded-lg shadow-lg hover:shadow-xl hover:bg-white/85 transition transform hover:scale-105">
                                 <div className="text-3xl mb-2">💡</div>
                                 <p className="font-semibold">Falta de Alumbrado</p>
                             </div>
-                            <div className="bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition">
+                            <div className="bg-white/75 backdrop-blur-md p-4 rounded-lg shadow-lg hover:shadow-xl hover:bg-white/85 transition transform hover:scale-105">
                                 <div className="text-3xl mb-2">🗑️</div>
                                 <p className="font-semibold">Acumulación de Basura</p>
                             </div>
-                            <div className="bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg hover:shadow-xl transition">
+                            <div className="bg-white/75 backdrop-blur-md p-4 rounded-lg shadow-lg hover:shadow-xl hover:bg-white/85 transition transform hover:scale-105">
                                 <div className="text-3xl mb-2">⚠️</div>
                                 <p className="font-semibold">Señalización Defectuosa</p>
                             </div>
@@ -183,7 +183,7 @@ export default function Home() {
                     </div>
 
                     {/* Final CTA */}
-                    <div className="bg-white/95 backdrop-blur-sm text-gray-800 rounded-lg shadow-xl p-8 text-center mb-8">
+                    <div className="bg-white/80 backdrop-blur-md text-gray-800 rounded-lg shadow-xl p-8 text-center mb-8">
                         <h2 className="text-3xl font-bold mb-4">¿Ya tienes un código de denuncia?</h2>
                         <p className="text-lg mb-6">Consulta el estado de tu reporte ingresando tu código único</p>
                         <Link
