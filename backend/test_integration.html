@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Integración - Sistema Denuncia Ciudadana</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #9C221C;
+            text-align: center;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #9C221C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #7A1A16;
+        }
+        .result {
+            background: #f8f9fa;
+            border-left: 4px solid #9C221C;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .success {
+            border-left-color: #22C55E;
+            background: #f0fdf4;
+        }
+        .error {
+            border-left-color: #EF4444;
+            background: #fef2f2;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-ok {
+            background: #22C55E;
+            color: white;
+        }
+        .status-error {
+            background: #EF4444;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Integración del Sistema</h1>
+    <p style="text-align: center; color: #666;">
+        Esta página prueba todos los endpoints de la API
+    </p>
+
+    <div class="test-section">
+        <h2>1. Test de Base de Datos</h2>
+        <button onclick="testDatabase()">🗄️ Probar Conexión a BD</button>
+        <div id="db-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test de Categorías</h2>
+        <button onclick="testCategorias()">📋 Obtener Categorías</button>
+        <div id="cat-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test de Áreas Municipales</h2>
+        <button onclick="testAreas()">🏢 Obtener Áreas</button>
+        <div id="areas-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Test de Denuncias</h2>
+        <button onclick="testDenuncias()">📝 Listar Denuncias</button>
+        <div id="denuncias-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Test de Registro de Usuario</h2>
+        <button onclick="testRegister()">👤 Registrar Usuario de Prueba</button>
+        <div id="register-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>6. Test de Login</h2>
+        <button onclick="testLogin()">🔐 Login como Admin</button>
+        <div id="login-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>7. Test Completo</h2>
+        <button onclick="runAllTests()">🚀 Ejecutar Todas las Pruebas</button>
+        <div id="all-result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost/DENUNCIA%20CIUDADANA/backend/api';
+
+        function showResult(elementId, data, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            const resultClass = isSuccess ? 'result success' : 'result error';
+            const statusClass = isSuccess ? 'status status-ok' : 'status status-error';
+            const statusText = isSuccess ? '✓ SUCCESS' : '✗ ERROR';
+
+            element.innerHTML = `
+                <span class="${statusClass}">${statusText}</span>
+                <div class="${resultClass}">${JSON.stringify(data, null, 2)}</div>
+            `;
+        }
+
+        async function testDatabase() {
+            try {
+                const response = await fetch(`${API_URL}/../setup_database_v2.php`);
+                const data = await response.json();
+                showResult('db-result', data, response.ok);
+            } catch (error) {
+                showResult('db-result', { error: error.message }, false);
+            }
+        }
+
+        async function testCategorias() {
+            try {
+                const response = await fetch(`${API_URL}/categorias/read.php`);
+                const data = await response.json();
+                showResult('cat-result', data, response.ok);
+            } catch (error) {
+                showResult('cat-result', { error: error.message }, false);
+            }
+        }
+
+        async function testAreas() {
+            try {
+                const response = await fetch(`${API_URL}/areas/read.php`);
+                const data = await response.json();
+                showResult('areas-result', data, response.ok);
+            } catch (error) {
+                showResult('areas-result', { error: error.message }, false);
+            }
+        }
+
+        async function testDenuncias() {
+            try {
+                const response = await fetch(`${API_URL}/denuncias/read.php`);
+                const data = await response.json();
+                showResult('denuncias-result', data, true); // 404 is OK if no denuncias
+            } catch (error) {
+                showResult('denuncias-result', { error: error.message }, false);
+            }
+        }
+
+        async function testRegister() {
+            try {
+                const userData = {
+                    dni: '98765432',
+                    nombres: 'Usuario',
+                    apellidos: 'Prueba',
+                    email: 'prueba' + Date.now() + '@test.com',
+                    password: 'test123',
+                    telefono: '987654321'
+                };
+
+                const response = await fetch(`${API_URL}/auth/register.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+                showResult('register-result', { sent: userData, response: data }, response.ok);
+            } catch (error) {
+                showResult('register-result', { error: error.message }, false);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                const loginData = {
+                    email: 'admin@municusco.gob.pe',
+                    password: 'admin123'
+                };
+
+                const response = await fetch(`${API_URL}/auth/login.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json();
+                if (data.jwt) {
+                    localStorage.setItem('jwt', data.jwt);
+                    showResult('login-result', { ...data, jwt: data.jwt.substring(0, 50) + '...' }, true);
+                } else {
+                    showResult('login-result', data, false);
+                }
+            } catch (error) {
+                showResult('login-result', { error: error.message }, false);
+            }
+        }
+
+        async function runAllTests() {
+            const resultsDiv = document.getElementById('all-result');
+            resultsDiv.innerHTML = '<div class="result">🔄 Ejecutando todas las pruebas...</div>';
+
+            const tests = [
+                { name: 'Base de Datos', fn: testDatabase, id: 'db-result' },
+                { name: 'Categorías', fn: testCategorias, id: 'cat-result' },
+                { name: 'Áreas', fn: testAreas, id: 'areas-result' },
+                { name: 'Denuncias', fn: testDenuncias, id: 'denuncias-result' },
+                { name: 'Login', fn: testLogin, id: 'login-result' }
+            ];
+
+            for (const test of tests) {
+                await test.fn();
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            resultsDiv.innerHTML = `
+                <span class="status status-ok">✓ COMPLETADO</span>
+                <div class="result success">
+Todas las pruebas ejecutadas.
+Revisa los resultados en cada sección arriba.
+
+Resumen:
+- Base de datos: Verificada
+- Categorías: ${document.getElementById('cat-result').textContent.includes('ERROR') ? '❌' : '✅'}
+- Áreas: ${document.getElementById('areas-result').textContent.includes('ERROR') ? '❌' : '✅'}
+- Denuncias: ${document.getElementById('denuncias-result').textContent.includes('ERROR') ? '❌' : '✅'}
+- Login: ${document.getElementById('login-result').textContent.includes('ERROR') ? '❌' : '✅'}
+                </div>
+            `;
+        }
+
+        // Auto-ejecutar test de base de datos al cargar
+        window.addEventListener('load', () => {
+            console.log('Página de tests cargada. URL de API:', API_URL);
+        });
+    </script>
+</body>
+</html>

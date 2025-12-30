@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Creación de Denuncias</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .btn-danger {
+            background: #f44336;
+        }
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        #log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff4444; }
+        .warning { color: #ffaa00; }
+        .info { color: #00aaff; }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Prueba de Creación de Denuncias</h1>
+
+        <div class="step">
+            <h2>Paso 1: Iniciar Sesión</h2>
+            <p>Primero necesitas obtener un JWT válido</p>
+            <label>Email:</label>
+            <input type="email" id="loginEmail" value="juan@email.com" placeholder="usuario@email.com">
+            <label>Password:</label>
+            <input type="password" id="loginPassword" value="123456" placeholder="contraseña">
+            <button onclick="login()">Iniciar Sesión y Obtener JWT</button>
+        </div>
+
+        <div class="step">
+            <h2>Paso 2: Crear Denuncia</h2>
+            <label>Título:</label>
+            <input type="text" id="titulo" value="Prueba desde navegador - Bache en la calle">
+
+            <label>Descripción:</label>
+            <textarea id="descripcion" rows="3">Esta es una denuncia de prueba creada desde el script de diagnóstico del navegador</textarea>
+
+            <label>Categoría ID:</label>
+            <input type="number" id="categoria_id" value="1">
+
+            <label>Latitud:</label>
+            <input type="text" id="latitud" value="-12.0464">
+
+            <label>Longitud:</label>
+            <input type="text" id="longitud" value="-77.0428">
+
+            <label>Dirección de Referencia:</label>
+            <input type="text" id="direccion" value="Av. Test 123, Lima">
+
+            <button onclick="crearDenuncia()" id="btnCrear" disabled>Crear Denuncia (requiere JWT)</button>
+        </div>
+
+        <div class="step">
+            <h2>Paso 3: Verificar Denuncias</h2>
+            <button onclick="obtenerDenuncias()" id="btnObtener" disabled>Obtener Mis Denuncias</button>
+            <button onclick="limpiarLog()" class="btn-danger">Limpiar Log</button>
+        </div>
+
+        <div id="log">
+            <div class="info">🔍 Esperando acciones...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost/DENUNCIA%20CIUDADANA/backend/api';
+        let jwt = null;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                success: '#00ff00',
+                error: '#ff4444',
+                warning: '#ffaa00',
+                info: '#00aaff'
+            };
+            logDiv.innerHTML += `<div style="color: ${colors[type]}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function limpiarLog() {
+            document.getElementById('log').innerHTML = '<div class="info">🔍 Log limpiado...</div>';
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            log('🔐 Intentando login...', 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/usuarios/login.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                log(`📡 Respuesta del servidor: ${response.status} ${response.statusText}`, 'info');
+
+                const data = await response.json();
+
+                if (response.ok && data.jwt) {
+                    jwt = data.jwt;
+                    localStorage.setItem('jwt', jwt);
+                    log('✅ LOGIN EXITOSO', 'success');
+                    log(`✅ JWT obtenido: ${jwt.substring(0, 50)}...`, 'success');
+                    log(`✅ Usuario: ${data.nombres} ${data.apellidos}`, 'success');
+                    log(`✅ Rol: ${data.rol}`, 'success');
+
+                    // Habilitar botones
+                    document.getElementById('btnCrear').disabled = false;
+                    document.getElementById('btnObtener').disabled = false;
+                } else {
+                    log(`❌ ERROR en login: ${data.message || 'Error desconocido'}`, 'error');
+                    log(`❌ Verifica que el usuario existe y la contraseña es correcta`, 'error');
+                }
+            } catch (error) {
+                log(`❌ EXCEPCIÓN al hacer login: ${error.message}`, 'error');
+                log(`❌ ¿XAMPP está corriendo? ¿La URL es correcta?`, 'error');
+            }
+        }
+
+        async function crearDenuncia() {
+            if (!jwt) {
+                log('❌ ERROR: Primero debes iniciar sesión', 'error');
+                return;
+            }
+
+            const denunciaData = {
+                titulo: document.getElementById('titulo').value,
+                descripcion: document.getElementById('descripcion').value,
+                categoria_id: parseInt(document.getElementById('categoria_id').value),
+                latitud: parseFloat(document.getElementById('latitud').value),
+                longitud: parseFloat(document.getElementById('longitud').value),
+                direccion_referencia: document.getElementById('direccion').value,
+                es_anonima: false
+            };
+
+            log('📝 Creando denuncia...', 'info');
+            log(`📤 Datos a enviar: ${JSON.stringify(denunciaData, null, 2)}`, 'info');
+            log(`🔑 JWT (primeros 50 chars): ${jwt.substring(0, 50)}...`, 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/denuncias/create.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    },
+                    body: JSON.stringify(denunciaData)
+                });
+
+                log(`📡 Respuesta del servidor: ${response.status} ${response.statusText}`, 'info');
+
+                const responseText = await response.text();
+                log(`📥 Respuesta cruda: ${responseText}`, 'info');
+
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    log(`❌ ERROR: La respuesta no es JSON válido`, 'error');
+                    log(`❌ Respuesta recibida: ${responseText}`, 'error');
+                    return;
+                }
+
+                if (response.ok) {
+                    log('✅ ¡DENUNCIA CREADA EXITOSAMENTE!', 'success');
+                    log(`✅ Código: ${data.codigo}`, 'success');
+                    log(`✅ ID: ${data.id}`, 'success');
+                    log(`✅ Mensaje: ${data.message}`, 'success');
+                    log('', 'info');
+                    log('🎉 Ahora prueba el botón "Obtener Mis Denuncias" para verificar', 'warning');
+                } else {
+                    log(`❌ ERROR al crear denuncia: ${data.message || 'Error desconocido'}`, 'error');
+
+                    if (response.status === 401) {
+                        log(`❌ Error 401: Token inválido o expirado`, 'error');
+                        log(`❌ Intenta hacer login nuevamente`, 'error');
+                    } else if (response.status === 400) {
+                        log(`❌ Error 400: Datos incompletos`, 'error');
+                        log(`❌ Verifica que todos los campos estén llenos`, 'error');
+                    } else if (response.status === 503) {
+                        log(`❌ Error 503: No se pudo crear en la base de datos`, 'error');
+                        log(`❌ Revisa los logs de PHP y MySQL`, 'error');
+                    }
+                }
+            } catch (error) {
+                log(`❌ EXCEPCIÓN al crear denuncia: ${error.message}`, 'error');
+                log(`❌ Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        async function obtenerDenuncias() {
+            if (!jwt) {
+                log('❌ ERROR: Primero debes iniciar sesión', 'error');
+                return;
+            }
+
+            log('📋 Obteniendo denuncias...', 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/denuncias/read.php`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt}`
+                    }
+                });
+
+                log(`📡 Respuesta del servidor: ${response.status} ${response.statusText}`, 'info');
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const total = data.records ? data.records.length : 0;
+                    log(`✅ Denuncias obtenidas: ${total}`, 'success');
+
+                    if (total > 0) {
+                        log('', 'info');
+                        log('📋 LISTA DE DENUNCIAS:', 'success');
+                        log('─'.repeat(80), 'info');
+                        data.records.forEach((denuncia, index) => {
+                            log(`${index + 1}. Código: ${denuncia.codigo}`, 'success');
+                            log(`   Título: ${denuncia.titulo}`, 'info');
+                            log(`   Estado: ${denuncia.estado}`, 'info');
+                            log(`   Categoría: ${denuncia.categoria_nombre || denuncia.categoria_id}`, 'info');
+                            log(`   Fecha: ${denuncia.fecha_registro || denuncia.created_at}`, 'info');
+                            log('─'.repeat(80), 'info');
+                        });
+                    } else {
+                        log('⚠️ No tienes denuncias registradas', 'warning');
+                        log('⚠️ Intenta crear una con el botón "Crear Denuncia"', 'warning');
+                    }
+                } else {
+                    log(`❌ ERROR al obtener denuncias: ${data.message || 'Error desconocido'}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ EXCEPCIÓN al obtener denuncias: ${error.message}`, 'error');
+            }
+        }
+
+        // Al cargar la página, intentar recuperar JWT del localStorage
+        window.onload = function() {
+            const storedJwt = localStorage.getItem('jwt');
+            if (storedJwt) {
+                jwt = storedJwt;
+                log('✅ JWT recuperado del localStorage', 'success');
+                log(`✅ JWT: ${jwt.substring(0, 50)}...`, 'info');
+                document.getElementById('btnCrear').disabled = false;
+                document.getElementById('btnObtener').disabled = false;
+                log('💡 Puedes crear una denuncia directamente', 'warning');
+            } else {
+                log('⚠️ No hay JWT en localStorage', 'warning');
+                log('⚠️ Debes iniciar sesión primero', 'warning');
+            }
+        };
+    </script>
+</body>
+</html>
