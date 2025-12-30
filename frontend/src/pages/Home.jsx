@@ -20,9 +20,9 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="relative min-h-screen">
+        <div className="relative">
             {/* Background Image Carousel */}
-            <div className="fixed inset-0 z-0">
+            <div className="fixed inset-0 z-0 pointer-events-none">
                 {images.map((image, index) => (
                     <div
                         key={index}
@@ -65,9 +65,9 @@ export default function Home() {
             </div>
 
             {/* Contenido principal */}
-            <div className="relative z-10">
+            <div className="relative z-10 min-h-screen">
                 {/* Hero Section */}
-                <div className="container mx-auto px-4 py-16">
+                <div className="container mx-auto px-4 py-16 pb-24">
                     <div className="text-center mb-12 mt-8">
                         <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
                             Sistema de Denuncias Ciudadanas
