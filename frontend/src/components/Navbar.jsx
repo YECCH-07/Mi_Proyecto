@@ -43,7 +43,7 @@ export default function Navbar() {
                   Sistema de Denuncias
                 </h1>
                 <p className="text-white/80 text-xs">
-                  Municipalidad
+                  Ciudadana
                 </p>
               </div>
             </Link>
