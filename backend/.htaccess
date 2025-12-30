@@ -1,12 +1,37 @@
-# Configuracion para permitir que PHP reciba el header Authorization
-
-RewriteEngine On
-
-# Capturar el header Authorization y ponerlo disponible para PHP
-RewriteCond %%{HTTP:Authorization} ^(.*)
-RewriteRule .* - [e=HTTP_AUTHORIZATION:%%1]
-
-# Permitir CORS
+# Habilitar CORS
 Header set Access-Control-Allow-Origin "*"
 Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+# Habilitar reescritura de URLs
+RewriteEngine On
+
+# Permitir solicitudes OPTIONS para CORS preflight
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# Proteger archivos sensibles
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Proteger archivo .env
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Directorio de índice
+DirectoryIndex index.php
+
+# Mostrar errores (DESACTIVAR EN PRODUCCIÓN)
+php_flag display_errors Off
+php_flag display_startup_errors Off
+php_value error_reporting 0
+
+# Aumentar límites de carga
+php_value upload_max_filesize 20M
+php_value post_max_size 20M
+php_value max_execution_time 300
+php_value max_input_time 300
