@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { getDashboardRoute } from '../utils/navigation';
 
 export const useAuth = () => {
     const [authState, setAuthState] = useState({
@@ -76,5 +77,9 @@ export const useAuth = () => {
         });
     };
 
-    return { ...authState, logout, checkAuth };
+    const getDashboard = () => {
+        return getDashboardRoute(authState.userRole);
+    };
+
+    return { ...authState, logout, checkAuth, getDashboard };
 };

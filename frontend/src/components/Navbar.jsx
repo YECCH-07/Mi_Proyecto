@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { getDashboardRoute } from '../utils/navigation';
 
 export default function Navbar() {
   const { isAuthenticated, userRole, userName, logout } = useAuth();
@@ -11,17 +12,7 @@ export default function Navbar() {
   };
 
   const getDashboardLink = () => {
-    switch (userRole) {
-      case 'admin':
-        return '/admin/dashboard';
-      case 'supervisor':
-        return '/supervisor/dashboard';
-      case 'operador':
-        return '/operador/dashboard';
-      case 'ciudadano':
-      default:
-        return '/ciudadano/mis-denuncias';
-    }
+    return getDashboardRoute(userRole);
   };
 
   return (

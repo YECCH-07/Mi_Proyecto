@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../../hooks/useAuth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost/DENUNCIA%20CIUDADANA/backend/api';
 
 export default function DetalleDenunciaOperador() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { getDashboard } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -155,7 +157,7 @@ export default function DetalleDenunciaOperador() {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => navigate('/operador/dashboard')}
+            onClick={() => navigate(getDashboard())}
             className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-md font-semibold transition"
           >
             Volver al Dashboard
@@ -201,7 +203,7 @@ export default function DetalleDenunciaOperador() {
               </div>
             </div>
             <button
-              onClick={() => navigate('/operador/dashboard')}
+              onClick={() => navigate(getDashboard())}
               className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-semibold transition flex items-center space-x-2"
             >
               <span>←</span>

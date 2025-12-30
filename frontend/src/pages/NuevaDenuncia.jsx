@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Assuming you use react-router for navigation
+import { useNavigate } from 'react-router-dom';
 import { denunciaService } from '../services/denunciaService';
+import { useAuth } from '../hooks/useAuth';
 import MapSelector from '../components/MapSelector';
 
 // You might want to fetch these from your API later
@@ -25,6 +26,7 @@ export default function NuevaDenuncia() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { getDashboard } = useAuth();
     const MAX_FILES = 10;
 
     const handleInputChange = (e) => {
@@ -107,9 +109,10 @@ export default function NuevaDenuncia() {
             // Step 3: Limpiar previews
             filePreviews.forEach(preview => URL.revokeObjectURL(preview.preview));
 
-            // Step 4: Redirect on success
+            // Step 4: Redirect on success to user's dashboard
             alert(`¡Denuncia registrada con éxito! Código: ${newDenuncia.codigo}\n${files.length > 0 ? `${files.length} foto(s) adjuntada(s)` : ''}`);
-            navigate('/'); // Redirect to home or a "my denuncias" page
+            const dashboardRoute = getDashboard();
+            navigate(dashboardRoute);
 
         } catch (err) {
             setError(err.message || 'Ocurrió un error al registrar la denuncia. Por favor, intenta de nuevo.');
