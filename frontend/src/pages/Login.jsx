@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { getDashboardRoute } from '../utils/navigation';
 
 const API_URL = 'http://localhost/DENUNCIA%20CIUDADANA/backend/api';
 
@@ -33,21 +34,8 @@ export default function Login() {
     }, []);
 
     const redirectByRole = (role) => {
-        switch (role) {
-            case 'admin':
-                navigate('/admin/dashboard', { replace: true });
-                break;
-            case 'supervisor':
-                navigate('/supervisor/dashboard', { replace: true });
-                break;
-            case 'operador':
-                navigate('/operador/dashboard', { replace: true });
-                break;
-            case 'ciudadano':
-            default:
-                navigate('/ciudadano/mis-denuncias', { replace: true });
-                break;
-        }
+        const dashboardRoute = getDashboardRoute(role);
+        navigate(dashboardRoute, { replace: true });
     };
 
     const handleInputChange = (e) => {

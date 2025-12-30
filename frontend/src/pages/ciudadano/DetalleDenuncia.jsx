@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { denunciaService } from '../../services/denunciaService';
+import { useAuth } from '../../hooks/useAuth';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -16,6 +17,7 @@ L.Icon.Default.mergeOptions({
 export default function DetalleDenuncia() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { getDashboard } = useAuth();
   const [denuncia, setDenuncia] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -82,7 +84,7 @@ export default function DetalleDenuncia() {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600 mb-6">{error || 'Denuncia no encontrada'}</p>
           <button
-            onClick={() => navigate('/ciudadano/mis-denuncias')}
+            onClick={() => navigate(getDashboard())}
             className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-md font-semibold transition"
           >
             Volver a Mis Denuncias
@@ -124,7 +126,7 @@ export default function DetalleDenuncia() {
               </div>
             </div>
             <button
-              onClick={() => navigate('/ciudadano/mis-denuncias')}
+              onClick={() => navigate(getDashboard())}
               className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-semibold transition flex items-center space-x-2"
             >
               <span>←</span>
