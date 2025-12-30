@@ -10,19 +10,17 @@ export default function Footer() {
           {/* Columna 1: Información de la Municipalidad */}
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              <div className="bg-white rounded-lg p-2 shadow-md">
-                <img
-                  src="/logo-municipalidad.png"
-                  alt="Logo"
-                  className="h-12 w-12 object-contain"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-                <div className="h-12 w-12 bg-white rounded flex items-center justify-center hidden">
-                  <span className="text-primary text-2xl">🏛️</span>
-                </div>
+              <img
+                src="/logo-municipalidad.png"
+                alt="Logo"
+                className="h-16 w-auto object-contain"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div className="h-16 w-16 flex items-center justify-center hidden">
+                <span className="text-white text-4xl">🏛️</span>
               </div>
               <div>
                 <h3 className="text-white font-bold text-lg">

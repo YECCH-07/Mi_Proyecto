@@ -23,21 +23,19 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {/* Logo de la Organización */}
             <Link to="/" className="flex items-center space-x-3 hover:opacity-90 transition">
-              <div className="bg-white rounded-lg p-2 shadow-md">
-                <img
-                  src="/logo-municipalidad.png"
-                  alt="Logo Municipalidad"
-                  className="h-12 w-12 object-contain"
-                  onError={(e) => {
-                    // Fallback si no existe el logo
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-                {/* Placeholder si no hay logo */}
-                <div className="h-12 w-12 bg-white rounded flex items-center justify-center hidden">
-                  <span className="text-primary text-2xl font-bold">🏛️</span>
-                </div>
+              <img
+                src="/logo-municipalidad.png"
+                alt="Logo Municipalidad"
+                className="h-16 w-auto object-contain"
+                onError={(e) => {
+                  // Fallback si no existe el logo
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              {/* Placeholder si no hay logo */}
+              <div className="h-16 w-16 flex items-center justify-center hidden">
+                <span className="text-white text-4xl">🏛️</span>
               </div>
 
               <div className="hidden md:block">
