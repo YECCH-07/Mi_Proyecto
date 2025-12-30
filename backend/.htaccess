@@ -1,0 +1,12 @@
+# Configuracion para permitir que PHP reciba el header Authorization
+
+RewriteEngine On
+
+# Capturar el header Authorization y ponerlo disponible para PHP
+RewriteCond %%{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%%1]
+
+# Permitir CORS
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
